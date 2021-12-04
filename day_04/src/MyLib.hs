@@ -69,8 +69,9 @@ lastBoardWinner (numbers, cards) =
         n : ns ->
             let cards' = playTurn n cards
             in case findLosers cards' of
-                -- Wait for one card to be left and calculate its score when it finally wins 
-                [] -> error "No losers"
+                -- Wait for one card to be left and calculate its score when it finally wins
+                -- This assumes all cards will win at some point which may not be the case
+                [] -> error "Multiple cards won on the last turn"
                 [x] -> firstBoardWinner (ns, [x])
                 xs -> lastBoardWinner (ns, xs)
 
