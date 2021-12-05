@@ -21,15 +21,39 @@ parseInput s =
     x : xs -> (parseNumbers x, parseCards xs)
 
 parseCards :: [String] -> [BingoCard]
-parseCards =
-  map lines
-    >>> map (map words)
-    >>> map (map (map (read :: String -> Integer)))
-    >>> map (map (map (,False)))
+parseCards = fmap parseCard
+  where
+    parseCard = fmap parseLine . lines
+    parseLine = fmap ((,False) . read) . words
 
 parseNumbers :: String -> [Integer]
 parseNumbers =
-  splitOn "," >>> map (read :: String -> Integer)
+  splitOn "," >>> fmap read
+
+firstBoardWinner :: ([Integer], [BingoCard]) -> (Integer, BingoCard)
+firstBoardWinner ([], _) = error "No more numbers"
+firstBoardWinner (n : ns, cards) =
+  let cards' = playTurn n cards
+   in case findVictors cards' of
+        [] -> firstBoardWinner (ns, cards')
+        [x] -> (n, x)
+        _ -> error "Multiple winners"
+
+lastBoardWinner :: ([Integer], [BingoCard]) -> (Integer, BingoCard)
+lastBoardWinner ([], _) = error "No more numbers"
+lastBoardWinner (n : ns, cards) =
+  let cards' = playTurn n cards
+   in case findLosers cards' of
+        -- Wait for one card to be left and calculate its score when it finally wins
+        -- This assumes all cards will win at some point which may not be the case
+        [] -> error "Multiple cards won on the last turn"
+        [x] -> firstBoardWinner (ns, [x])
+        xs -> lastBoardWinner (ns, xs)
+
+playTurn :: Integer -> [BingoCard] -> [BingoCard]
+playTurn n =
+  let playTurnForCell n (n', b) = (n', b || n == n')
+   in (fmap . fmap . fmap . playTurnForCell) n
 
 findVictors :: [BingoCard] -> [BingoCard]
 findVictors =
@@ -40,57 +64,10 @@ findLosers =
   filter (not . checkVictory)
 
 checkVictory :: BingoCard -> Bool
-checkVictory card =
-  checkVictoryRows card || checkVictoryColumns card
-
-checkVictoryRows :: BingoCard -> Bool
-checkVictoryRows =
-  any (all snd)
-
-checkVictoryColumns :: BingoCard -> Bool
-checkVictoryColumns =
-  transpose >>> checkVictoryRows
-
-firstBoardWinner :: ([Integer], [BingoCard]) -> (Integer, BingoCard)
-firstBoardWinner (numbers, cards) =
-  case numbers of
-    [] -> error "No more numbers"
-    n : ns ->
-      let cards' = playTurn n cards
-       in case findVictors cards' of
-            [] -> firstBoardWinner (ns, cards')
-            [x] -> (n, x)
-            _ -> error "Multiple winners"
-
-lastBoardWinner :: ([Integer], [BingoCard]) -> (Integer, BingoCard)
-lastBoardWinner (numbers, cards) =
-    case numbers of
-        [] -> error "No more numbers"
-        n : ns ->
-            let cards' = playTurn n cards
-            in case findLosers cards' of
-                -- Wait for one card to be left and calculate its score when it finally wins
-                -- This assumes all cards will win at some point which may not be the case
-                [] -> error "Multiple cards won on the last turn"
-                [x] -> firstBoardWinner (ns, [x])
-                xs -> lastBoardWinner (ns, xs)
-
-playTurn :: Integer -> [BingoCard] -> [BingoCard]
-playTurn n =
-  map (playTurnForCard n)
-
-playTurnForCard :: Integer -> BingoCard -> BingoCard
-playTurnForCard n =
-  map (playTurnForRow n)
-
-playTurnForRow :: Integer -> [(Integer, Bool)] -> [(Integer, Bool)]
-playTurnForRow n =
-  map (playTurnForCell n)
-
-playTurnForCell :: Integer -> (Integer, Bool) -> (Integer, Bool)
-playTurnForCell n (n', b)
-  | n == n' = (n, True)
-  | otherwise = (n', b)
+checkVictory card = checkVictoryRows card || checkVictoryColumns card
+  where
+    checkVictoryRows = any (all snd)
+    checkVictoryColumns = transpose >>> checkVictoryRows
 
 calculateScore :: (Integer, BingoCard) -> Integer
 calculateScore (n, card) =
@@ -98,4 +75,4 @@ calculateScore (n, card) =
 
 sumUnmarkedCells :: BingoCard -> Integer
 sumUnmarkedCells =
-  sum . map (sum . map (\(n, b) -> if not b then n else 0))
+  sum . fmap (sum . fmap (\(n, b) -> if not b then n else 0))
