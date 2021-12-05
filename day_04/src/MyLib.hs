@@ -40,15 +40,19 @@ firstBoardWinner (n : ns, cards) =
         _ -> error "Multiple winners"
 
 lastBoardWinner :: ([Integer], [BingoCard]) -> (Integer, BingoCard)
-lastBoardWinner ([], _) = error "No more numbers"
-lastBoardWinner (n : ns, cards) =
+lastBoardWinner = lastBoardWinner' Nothing
+
+lastBoardWinner' :: Maybe (Integer, BingoCard) -> ([Integer], [BingoCard]) -> (Integer, BingoCard)
+lastBoardWinner' Nothing ([], _) = error "No winners found or multiple last winners"
+lastBoardWinner' (Just winner) ([], _) = winner
+lastBoardWinner' lastWinner (n : ns, cards) =
   let cards' = playTurn n cards
-   in case findLosers cards' of
-        -- Wait for one card to be left and calculate its score when it finally wins
-        -- This assumes all cards will win at some point which may not be the case
-        [] -> error "Multiple cards won on the last turn"
-        [x] -> firstBoardWinner (ns, [x])
-        xs -> lastBoardWinner (ns, xs)
+      winners = findVictors cards'
+      losers = findLosers cards'
+   in case winners of
+        [] -> lastBoardWinner' lastWinner (ns, losers)
+        [x] -> lastBoardWinner' (Just (n, x)) (ns, losers)
+        _ -> lastBoardWinner' Nothing (ns, losers)
 
 playTurn :: Integer -> [BingoCard] -> [BingoCard]
 playTurn n =
