@@ -9,10 +9,10 @@ import Data.List.Split (splitOn)
 type BingoCard = [[(Integer, Bool)]]
 
 part1 :: String -> String
-part1 = parseInput >>> firstBoardWinner >>> calculateScore >>> show
+part1 = parseInput >>> firstWinningCard >>> calculateScore >>> show
 
 part2 :: String -> String
-part2 = parseInput >>> lastBoardWinner >>> calculateScore >>> show
+part2 = parseInput >>> lastWinningCard >>> calculateScore >>> show
 
 parseInput :: String -> ([Integer], [BingoCard])
 parseInput s =
@@ -30,29 +30,29 @@ parseNumbers :: String -> [Integer]
 parseNumbers =
   splitOn "," >>> fmap read
 
-firstBoardWinner :: ([Integer], [BingoCard]) -> (Integer, BingoCard)
-firstBoardWinner ([], _) = error "No more numbers"
-firstBoardWinner (n : ns, cards) =
+firstWinningCard :: ([Integer], [BingoCard]) -> (Integer, BingoCard)
+firstWinningCard ([], _) = error "No more numbers"
+firstWinningCard (n : ns, cards) =
   let cards' = playTurn n cards
    in case findVictors cards' of
-        [] -> firstBoardWinner (ns, cards')
+        [] -> firstWinningCard (ns, cards')
         [x] -> (n, x)
         _ -> error "Multiple winners"
 
-lastBoardWinner :: ([Integer], [BingoCard]) -> (Integer, BingoCard)
-lastBoardWinner = lastBoardWinner' Nothing
+lastWinningCard :: ([Integer], [BingoCard]) -> (Integer, BingoCard)
+lastWinningCard = lastWinningCard' Nothing
 
-lastBoardWinner' :: Maybe (Integer, BingoCard) -> ([Integer], [BingoCard]) -> (Integer, BingoCard)
-lastBoardWinner' Nothing ([], _) = error "No winners found or multiple last winners"
-lastBoardWinner' (Just winner) ([], _) = winner
-lastBoardWinner' lastWinner (n : ns, cards) =
+lastWinningCard' :: Maybe (Integer, BingoCard) -> ([Integer], [BingoCard]) -> (Integer, BingoCard)
+lastWinningCard' Nothing ([], _) = error "No winners found or multiple last winners"
+lastWinningCard' (Just winner) ([], _) = winner
+lastWinningCard' lastWinner (n : ns, cards) =
   let cards' = playTurn n cards
       winners = findVictors cards'
       losers = findLosers cards'
    in case winners of
-        [] -> lastBoardWinner' lastWinner (ns, losers)
-        [x] -> lastBoardWinner' (Just (n, x)) (ns, losers)
-        _ -> lastBoardWinner' Nothing (ns, losers)
+        [] -> lastWinningCard' lastWinner (ns, losers)
+        [x] -> lastWinningCard' (Just (n, x)) (ns, losers)
+        _ -> lastWinningCard' Nothing (ns, losers)
 
 playTurn :: Integer -> [BingoCard] -> [BingoCard]
 playTurn n =
