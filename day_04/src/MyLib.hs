@@ -56,8 +56,9 @@ lastBoardWinner' lastWinner (n : ns, cards) =
 
 playTurn :: Integer -> [BingoCard] -> [BingoCard]
 playTurn n =
-  let playTurnForCell n (n', b) = (n', b || n == n')
-   in (fmap . fmap . fmap . playTurnForCell) n
+  (fmap . fmap . fmap) playTurnForCell
+  where
+    playTurnForCell (n', b) = (n', b || n == n')
 
 findVictors :: [BingoCard] -> [BingoCard]
 findVictors =
@@ -79,4 +80,4 @@ calculateScore (n, card) =
 
 sumUnmarkedCells :: BingoCard -> Integer
 sumUnmarkedCells =
-  sum . fmap (sum . fmap (\(n, b) -> if not b then n else 0))
+  sum . map fst . filter (not . snd) . concat
