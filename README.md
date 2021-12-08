@@ -11,3 +11,4 @@ The goal for this year is to solve the challenges using a different language eve
 - **Day 3**: [Java](https://github.com/Gadiguibou/advent-of-code-2021/tree/main/day_03) - I tried to use Forth, but I didn't have the time to get familiar enough with the language to use it to write a solution for the challenge on the same day.
 - **Day 4**: [Haskell](https://github.com/Gadiguibou/advent-of-code-2021/tree/main/day_04) - I had a lot of fun completing this day! Haskell is a really nice language to work with :)
 - **Day 5**: [Lua](https://github.com/Gadiguibou/advent-of-code-2021/tree/main/day_05)
+- **Day 6**: [Racket](https://github.com/Gadiguibou/advent-of-code-2021/tree/main/day_06)
