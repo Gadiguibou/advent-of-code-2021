@@ -12,3 +12,4 @@ The goal for this year is to solve the challenges using a different language eve
 - **Day 4**: [Haskell](https://github.com/Gadiguibou/advent-of-code-2021/tree/main/day_04) - I had a lot of fun completing this day! Haskell is a really nice language to work with :)
 - **Day 5**: [Lua](https://github.com/Gadiguibou/advent-of-code-2021/tree/main/day_05)
 - **Day 6**: [(Typed) Racket](https://github.com/Gadiguibou/advent-of-code-2021/tree/main/day_06)
+- **Day 7**: [APL](https://github.com/Gadiguibou/advent-of-code-2021/tree/main/day_07)
